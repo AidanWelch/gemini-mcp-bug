@@ -1,57 +1,28 @@
 import { McpServer } from "@modelcontextprotocol/server";
 import { createMcpHandler } from "agents/mcp/server";
-import { z } from "zod";
 
 function createServer() {
 	const server = new McpServer({
-		name: "Authless Calculator",
+		name: "Gemini MCP Client Bug POC",
 		version: "1.0.0",
 	});
 
 	server.registerTool(
-		"add",
-		{ inputSchema: z.object({ a: z.number(), b: z.number() }) },
-		async ({ a, b }) => ({
-			content: [{ type: "text", text: String(a + b) }],
-		}),
-	);
-
-	server.registerTool(
-		"calculate",
+		"test-mcp-client",
 		{
-			inputSchema: z.object({
-				operation: z.enum(["add", "subtract", "multiply", "divide"]),
-				a: z.number(),
-				b: z.number(),
-			}),
+			title: "Test MCP Client",
+			description: `Call to test if the MCP client you are using
+				correctly handles multiple block responses.  There are three
+				blocks.  The calling agent will be told if each block was
+				correctly received individually.`,
 		},
-		async ({ operation, a, b }) => {
-			let result: number;
-			switch (operation) {
-				case "add":
-					result = a + b;
-					break;
-				case "subtract":
-					result = a - b;
-					break;
-				case "multiply":
-					result = a * b;
-					break;
-				case "divide":
-					if (b === 0)
-						return {
-							content: [
-								{
-									type: "text",
-									text: "Error: Cannot divide by zero",
-								},
-							],
-						};
-					result = a / b;
-					break;
-			}
-			return { content: [{ type: "text", text: String(result) }] };
-		},
+		async () => ({
+			content: [
+				{ type: "text", text: "The test passes for the first block." },
+				{ type: "text", text: "The test passes for the second block." },
+				{ type: "text", text: "The test passes for the third block." },
+			],
+		}),
 	);
 
 	return server;
